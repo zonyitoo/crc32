@@ -1,0 +1,5 @@
+[package]
+
+name = "crc32"
+version = "0.0.1"
+authors = ["Arlie Davis <arlie.davis@gmail.com>"]
