@@ -1,6 +1,6 @@
 [package]
 name = "crc32"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Arlie Davis <arlie.davis@gmail.com>"]
 description = "A port of the CRC-32 algorithm to Rust"
 documentation = "http://www.zlib.net/crc_v3.txt"
