@@ -28,12 +28,12 @@ const TBLS : uint = 8;
   endian machines, where a word is four bytes.
 */
 
-pub type CrcTable = [[u32, ..0x100], ..TBLS];
+pub type CrcTable = [[u32; 0x100]; TBLS];
 
 pub fn make_crc_table() -> CrcTable
 {
     /* terms of polynomial defining this crc (except x^32): */
-    let p : [u8, ..14] = [0,1,2,4,5,7,8,10,11,12,16,22,23,26]; // 14 terms
+    let p : [u8; 14] = [0,1,2,4,5,7,8,10,11,12,16,22,23,26]; // 14 terms
 
     /* make exclusive-or pattern from polynomial (0xedb88320UL) */
     let mut poly : u32 = 0; /* polynomial exclusive-or pattern */
@@ -42,7 +42,7 @@ pub fn make_crc_table() -> CrcTable
     }
 
     // local z_crc_t FAR crc_table[TBLS][256];
-    let mut crc_table : [[u32, ..0x100], ..TBLS] = [[0, ..0x100], ..TBLS];
+    let mut crc_table : [[u32; 0x100]; TBLS] = [[0; 0x100]; TBLS];
 
     /* generate a crc for every 8-bit value */
     for n in range(0, 0x100) {
@@ -88,7 +88,7 @@ pub fn write_tables(crc_table: &CrcTable) -> String
 
     s.push_str("/* crc32tables.rs -- tables for rapid CRC calculation\n");
     s.push_str(" * Generated automatically by crc32gen.rs\n */\n\n");
-    s.push_str("pub static CRC_TABLE:[[u32, ..0x100], ..8] = [\n  [\n");
+    s.push_str("pub static CRC_TABLE:[[u32; 0x100]; 8] = [\n  [\n");
     write_table(&mut s, &tt[0]);
 // #  ifdef BYFOUR
     s.push_str("// #ifdef BYFOUR\n");
@@ -103,8 +103,7 @@ pub fn write_tables(crc_table: &CrcTable) -> String
 // #endif /* MAKECRCH */
 }
 
-fn write_table(s: &mut String, table: &[u32, ..0x100])
-{
+fn write_table(s: &mut String, table: &[u32; 0x100]) {
     for n in range(0, 0x100) {
         let line = format!("{}0x{:08x}{}", if n % 5 != 0 { "" } else { "    " },
                 table[n],
