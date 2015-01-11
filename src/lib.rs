@@ -22,11 +22,10 @@ mod crc32tables;
 /// Computes the CRC-32 function over a block of data.  The caller provides
 /// the previous CRC value as `start_crc` and the input data as `buf`.  The
 /// function computes the CRC and returns it.
-pub fn crc32(start_crc :u32, buf :&[u8]) -> u32
-{
+pub fn crc32(start_crc: u32, buf: &[u8]) -> u32 {
     let len = buf.len();
     let mut crc = start_crc;
-    let mut bufpos :uint = 0; // index into buf
+    let mut bufpos: usize  = 0; // index into buf
     let mut remaining_bytes = len;
 
 /*// #ifdef BYFOUR
@@ -52,7 +51,7 @@ pub fn crc32(start_crc :u32, buf :&[u8]) -> u32
         let b = buf[bufpos];
         let b32 = b as u32;
         let b_index = (crc ^ b32) & 0xff;
-        let t = t0[b_index as uint];
+        let t = t0[b_index as usize];
         crc = t ^ (crc >> 8);
         bufpos += 1;
         remaining_bytes -= 1;
@@ -61,24 +60,21 @@ pub fn crc32(start_crc :u32, buf :&[u8]) -> u32
     crc ^ 0xffffffff
 }
 
-mod byfour
-{
-    // use std::slice;
+pub mod byfour {
     use crc32tables::CRC_TABLE;
 
-/* ========================================================================= */
-fn dolit4(c: &mut u32, buf4: &[u32], buf4pos: &mut uint)
-{
+#[allow(dead_code)]
+fn dolit4(c: &mut u32, buf4: &[u32], buf4pos: &mut usize) {
     let c1 = *c ^ buf4[*buf4pos];
     *buf4pos += 1;
-    *c = CRC_TABLE[3][(c1 & 0xff) as uint]
-      ^ CRC_TABLE[2][((c1 >> 8) & 0xff) as uint]
-      ^ CRC_TABLE[1][((c1 >> 16) & 0xff) as uint]
-      ^ CRC_TABLE[0][(c1 >> 24) as uint];
+    *c = CRC_TABLE[3][(c1 & 0xff) as usize]
+      ^ CRC_TABLE[2][((c1 >> 8) & 0xff) as usize]
+      ^ CRC_TABLE[1][((c1 >> 16) & 0xff) as usize]
+      ^ CRC_TABLE[0][(c1 >> 24) as usize];
 }
 
-fn dolit32(c: &mut u32, buf4: &[u32], buf4pos: &mut uint)
-{
+#[allow(dead_code)]
+fn dolit32(c: &mut u32, buf4: &[u32], buf4pos: &mut usize) {
     dolit4(c, buf4, buf4pos);
     dolit4(c, buf4, buf4pos);
     dolit4(c, buf4, buf4pos);
@@ -89,38 +85,34 @@ fn dolit32(c: &mut u32, buf4: &[u32], buf4pos: &mut uint)
     dolit4(c, buf4, buf4pos);
 }
 
-fn slice_u8_as_u32(s8: &[u8]) -> &[u32]
-{
+#[allow(dead_code)]
+#[allow(unstable)]
+fn slice_u8_as_u32(s8: &[u8]) -> &[u32] {
     unsafe {
         let ptr: *const u32 = s8.as_ptr() as *const u32;
         ::std::mem::transmute(::std::raw::Slice { data: ptr, len: s8.len() / 4 })
     }
 }
 
-// rusti: fn slice_u8_as_u32(s8: &[u8]) -> &[u32] { let new_len = s8.len() / 4;     unsafe { let ptr: *const u32 = s8.as_ptr() as *const u32; slice::from_raw_buf(ptr, new_len) } }
-
-
-/* ========================================================================= */
-fn crc32_little(crc: u32, buf: &[u8]) -> u32
-{
+pub fn crc32_little(crc: u32, buf: &[u8]) -> u32 {
     let mut len = buf.len();
     let mut bufpos = 0;     // index into buf
 
     let mut c: u32 = crc;
     c = !c;
 
-    let mut buf_align_bits = (buf.as_ptr() as uint) & 3;
+    let mut buf_align_bits = (buf.as_ptr() as usize) & 3;
     while len != 0 && (buf_align_bits & 3) != 0 {
         let b = buf[bufpos];
         let bi = (c & 0xff) as u8 ^ b;
-        c = CRC_TABLE[0][bi as uint] ^ (c >> 8);
+        c = CRC_TABLE[0][bi as usize] ^ (c >> 8);
         buf_align_bits += 1;
         bufpos += 1;
         len -= 1;
     }
 
-    let buf4 = slice_u8_as_u32(buf.slice(bufpos, len - bufpos));
-    let mut buf4pos: uint = 0;
+    let buf4 = slice_u8_as_u32(&buf[bufpos .. len - bufpos]);
+    let mut buf4pos: usize = 0;
     while len >= 32 {
         dolit32(&mut c, buf4, &mut buf4pos);
         len -= 32;
@@ -138,7 +130,7 @@ fn crc32_little(crc: u32, buf: &[u8]) -> u32
         loop {
             let b = buf[bufpos];
             let bi = (c & 0xff) as u8 ^ b;
-            c = CRC_TABLE[0][bi as uint] ^ (c >> 8);
+            c = CRC_TABLE[0][bi as usize] ^ (c >> 8);
             bufpos += 1;
             len -= 1;
             if len == 0 {

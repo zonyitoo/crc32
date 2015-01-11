@@ -1,4 +1,4 @@
-
+#![allow(unstable)]
 
 use std::io;
 
@@ -18,5 +18,5 @@ fn main() {
     let outfile = io::File::create(&outpath);
     let mut outwr = io::BufferedWriter::new(outfile);
 
-    outwr.write_str(s.as_slice()).unwrap();
+    outwr.write_str(&s[]).unwrap();
 }

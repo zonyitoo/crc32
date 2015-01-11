@@ -1,5 +1,5 @@
 
-const TBLS : uint = 8;
+const TBLS: usize = 8;
 
 /*
   Generate tables for a byte-wise 32-bit CRC calculation on the polynomial:
@@ -30,24 +30,23 @@ const TBLS : uint = 8;
 
 pub type CrcTable = [[u32; 0x100]; TBLS];
 
-pub fn make_crc_table() -> CrcTable
-{
+pub fn make_crc_table() -> CrcTable {
     /* terms of polynomial defining this crc (except x^32): */
     let p : [u8; 14] = [0,1,2,4,5,7,8,10,11,12,16,22,23,26]; // 14 terms
 
     /* make exclusive-or pattern from polynomial (0xedb88320UL) */
     let mut poly : u32 = 0; /* polynomial exclusive-or pattern */
     for term in p.iter() {
-        poly |= 1u32 << (31 - *term as uint);
+        poly |= 1u32 << (31 - *term as usize);
     }
 
     // local z_crc_t FAR crc_table[TBLS][256];
     let mut crc_table : [[u32; 0x100]; TBLS] = [[0; 0x100]; TBLS];
 
     /* generate a crc for every 8-bit value */
-    for n in range(0, 0x100) {
+    for n in (0..0x100) {
         let mut c = n as u32;
-        for _ in range(0u, 8u) {
+        for _ in (0..8) {
             c = if (c & 1) != 0 { poly ^ (c >> 1) } else { c >> 1 }
         }
         crc_table[0][n] = c;
@@ -56,11 +55,11 @@ pub fn make_crc_table() -> CrcTable
 // #ifdef BYFOUR
     /* generate crc for each value followed by one, two, and three zeros,
         and then the byte reversal of those as well as the first table */
-    for n in range(0, 0x100) {
-        let mut c : u32 = crc_table[0][n];
+    for n in (0..0x100) {
+        let mut c: u32 = crc_table[0][n];
         crc_table[4][n] = zswap32(c);
-        for k in range(1, 3) {
-            c = crc_table[0][c as uint & 0xff] ^ (c >> 8);
+        for k in (1..3) {
+            c = crc_table[0][(c & 0xff) as usize] ^ (c >> 8);
             crc_table[k][n] = c;
             crc_table[k + 4][n] = zswap32(c);
         }
@@ -78,13 +77,11 @@ pub fn zswap32(n: u32) -> u32
     | ((n >> 24) & 0x000000ffu32)   // aa
 }
 
-pub fn write_tables(crc_table: &CrcTable) -> String 
-{
-    /* write out CRC tables to crc32.h */
+pub fn write_tables(crc_table: &CrcTable) -> String {
+    // write out CRC tables to crc32.h
     let mut s : String = String::new();
 
     let tt = crc_table;
-    // let &CrcTable(ref tt) = &crc_table; // match crc_table { &CrcTable(ref t) => t };
 
     s.push_str("/* crc32tables.rs -- tables for rapid CRC calculation\n");
     s.push_str(" * Generated automatically by crc32gen.rs\n */\n\n");
@@ -92,7 +89,7 @@ pub fn write_tables(crc_table: &CrcTable) -> String
     write_table(&mut s, &tt[0]);
 // #  ifdef BYFOUR
     s.push_str("// #ifdef BYFOUR\n");
-    for k in range(1, 8) {
+    for k in (1..8) {
         s.push_str("  ],\n [\n");
         write_table(&mut s, &tt[k]);
     }
@@ -104,10 +101,10 @@ pub fn write_tables(crc_table: &CrcTable) -> String
 }
 
 fn write_table(s: &mut String, table: &[u32; 0x100]) {
-    for n in range(0, 0x100) {
+    for n in (0..0x100) {
         let line = format!("{}0x{:08x}{}", if n % 5 != 0 { "" } else { "    " },
                 table[n],
                 if n == 255 { "\n" } else if n % 5 == 4 { ",\n" } else { ", " });
-        s.push_str(line.as_slice());
+        s.push_str(&line[]);
     }
 }
