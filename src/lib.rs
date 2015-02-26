@@ -10,6 +10,8 @@
  * factor of two increase in speed on a Power PC G4 (PPC7455) using gcc -O3.
  */
 
+#![feature(core)]
+
 use crc32tables::CRC_TABLE;
 
 mod crc32tables;
@@ -86,7 +88,6 @@ fn dolit32(c: &mut u32, buf4: &[u32], buf4pos: &mut usize) {
 }
 
 #[allow(dead_code)]
-#[allow(unstable)]
 fn slice_u8_as_u32(s8: &[u8]) -> &[u32] {
     unsafe {
         let ptr: *const u32 = s8.as_ptr() as *const u32;

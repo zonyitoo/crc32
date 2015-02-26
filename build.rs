@@ -1,6 +1,8 @@
-#![allow(unstable)]
+#![feature(fs, io, path)]
 
-use std::io;
+use std::fs::File;
+use std::io::{BufWriter, Write};
+use std::path::Path;
 
 #[path = "src/crc32gen.rs"]
 mod crc32gen;
@@ -15,8 +17,8 @@ fn main() {
 
     let outpath = Path::new(outfile_name);
 
-    let outfile = io::File::create(&outpath);
-    let mut outwr = io::BufferedWriter::new(outfile);
+    let outfile = File::create(&outpath).unwrap();
+    let mut outwr = BufWriter::new(outfile);
 
-    outwr.write_str(&s[]).unwrap();
+    outwr.write_all(s.as_bytes()).unwrap();
 }

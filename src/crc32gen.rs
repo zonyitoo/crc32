@@ -69,7 +69,7 @@ pub fn make_crc_table() -> CrcTable {
     crc_table
 }
 
-pub fn zswap32(n: u32) -> u32 
+pub fn zswap32(n: u32) -> u32
 {
     (n << 24)                       // dd
     | ((n << 8) & 0x00ff0000u32)    // cc
@@ -105,6 +105,6 @@ fn write_table(s: &mut String, table: &[u32; 0x100]) {
         let line = format!("{}0x{:08x}{}", if n % 5 != 0 { "" } else { "    " },
                 table[n],
                 if n == 255 { "\n" } else if n % 5 == 4 { ",\n" } else { ", " });
-        s.push_str(&line[]);
+        s.push_str(&line[..]);
     }
 }
